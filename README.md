@@ -103,7 +103,7 @@ sudo apt-get update
 sudo apt-get -y install cuda
 ```
 
-alternatively, one can install cudatoolkits in a cuda environment:
+alternatively, one can install cudatoolkits in a conda environment:
 
 ```bash
 conda create -n llmstudio python=3.10
@@ -161,7 +161,7 @@ If you are running H2O LLM Studio with a custom environment other than Pipenv, y
 H2O_WAVE_MAX_REQUEST_SIZE=25MB \
 H2O_WAVE_NO_LOG=true \
 H2O_WAVE_PRIVATE_DIR="/download/@output/download" \
-wave run app
+wave run llm_studio.app
 ```
 
 If you are using the [nightly conda environment](#nightly-conda-virtual-environment), you can run ```make llmstudio-conda```.
@@ -184,7 +184,7 @@ docker run \
     --shm-size=64g \
     --init \
     --rm \
-    --it \
+    -it \
     -u `id -u`:`id -g` \
     -p 10101:10101 \
     -v `pwd`/llmstudio_mnt:/home/llmstudio/mount \
@@ -208,7 +208,7 @@ docker run \
     --shm-size=64g \
     --init \
     --rm \
-    --it \
+    -it \
     -u `id -u`:`id -g` \
     -p 10101:10101 \
     -v `pwd`/llmstudio_mnt:/home/llmstudio/mount \
@@ -223,7 +223,7 @@ Alternatively, you can run H2O LLM Studio GUI by using our self-hosted Docker im
 You can also use H2O LLM Studio with the command line interface (CLI) and specify the configuration .yaml file that contains all the experiment parameters. To finetune using H2O LLM Studio with CLI, activate the pipenv environment by running `make shell`, and then use the following command:
 
 ```bash
-python train.py -Y {path_to_config_yaml_file}
+python llm_studio/train.py -Y {path_to_config_yaml_file}
 ```
 
 To run on multiple GPUs in DDP mode, run the following command:
@@ -237,7 +237,7 @@ By default, the framework will run on the first `k` GPUs. If you want to specify
 To start an interactive chat with your trained model, use the following command:
 
 ```bash
-python prompt.py -e {experiment_name}
+python llm_studio/prompt.py -e {experiment_name}
 ```
 
 where `experiment_name` is the output folder of the experiment you want to chat with (see configuration).
@@ -248,7 +248,7 @@ To publish the model to Hugging Face, use the following command:
 ```bash
 make shell 
 
-python publish_to_hugging_face.py -p {path_to_experiment} -d {device} -a {api_key} -u {user_id} -m {model_name} -s {safe_serialization}
+python llm_studio/publish_to_hugging_face.py -p {path_to_experiment} -d {device} -a {api_key} -u {user_id} -m {model_name} -s {safe_serialization}
 ```
 
 `path_to_experiment` is the output folder of the experiment.

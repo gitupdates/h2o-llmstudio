@@ -30,9 +30,7 @@ ENV HOME=/home/llmstudio
 # Static application code lives in /workspace/
 WORKDIR /workspace
 
-# Add pip to the PATH
 ENV PATH=/home/llmstudio/.local/bin:$PATH
-ENV PATH=/workspace/.venv/bin:$PATH
 RUN \
     curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10 && \
     chmod -R a+w /home/llmstudio
@@ -43,6 +41,9 @@ COPY Makefile Pipfile Pipfile.lock /workspace/
 ENV PIPENV_VENV_IN_PROJECT=1
 RUN make setup && chmod -R 777 /workspace/.venv
 
+# Add the venv to the PATH
+ENV PATH=/workspace/.venv/bin:$PATH
+
 # We need to create a mount point for the user to mount their volume
 # All persistent data lives in /home/llmstudio/mount
 RUN mkdir -p /home/llmstudio/mount
@@ -51,7 +52,7 @@ ENV H2O_LLM_STUDIO_WORKDIR=/home/llmstudio/mount
 # Download the demo datasets and place in the /workspace/demo directory
 # Set the environment variable for the demo datasets
 ENV H2O_LLM_STUDIO_DEMO_DATASETS=/workspace/demo
-COPY download_default_datasets.py /workspace/
+COPY llm_studio/download_default_datasets.py /workspace/
 RUN python download_default_datasets.py
 
 COPY . /workspace
@@ -64,6 +65,9 @@ RUN apt-get purge -y git curl python3.10-distutils software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 USER llmstudio
+
+ENV HF_HUB_DISABLE_TELEMETRY=1
+ENV DO_NOT_TRACK=1
 
 # Set the environment variables for the wave server
 ENV H2O_WAVE_APP_ADDRESS=http://127.0.0.1:8756

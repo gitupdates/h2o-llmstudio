@@ -22,7 +22,7 @@ else
     PW_DEBUG =
 endif
 
-PHONY: pipenv
+.PHONY: pipenv
 pipenv:
 	$(PIP) install pip==24.2
 	$(PIP) install pipenv==2024.0.1
@@ -56,6 +56,7 @@ setup-conda:
 		python -m pip install flash-attn==2.6.1 --no-build-isolation --upgrade --no-cache-dir; \
 	'
 
+.PHONY: setup-ui
 setup-ui: pipenv
 	$(PIPENV) install --verbose --categories=dev-packages --python $(PYTHON_VERSION)
 	$(PIPENV) run playwright install
@@ -180,30 +181,33 @@ test-ui-github-actions: reports setup-ui
 
 .PHONY: wave
 wave:
+	HF_HUB_DISABLE_TELEMETRY=1 \
 	H2O_WAVE_APP_ACCESS_KEY_ID=dev \
 	H2O_WAVE_APP_ACCESS_KEY_SECRET=dev \
 	H2O_WAVE_MAX_REQUEST_SIZE=25MB \
 	H2O_WAVE_NO_LOG=true \
 	H2O_WAVE_PRIVATE_DIR="/download/@$(WORKDIR)/output/download" \
-	$(PIPENV) run wave run app
+	$(PIPENV) run wave run llm_studio.app
 
 .PHONY: llmstudio
 llmstudio:
 	nvidia-smi && \
+	HF_HUB_DISABLE_TELEMETRY=1 \
 	H2O_WAVE_MAX_REQUEST_SIZE=25MB \
 	H2O_WAVE_NO_LOG=true \
 	H2O_WAVE_PRIVATE_DIR="/download/@$(WORKDIR)/output/download" \
-	$(PIPENV) run wave run --no-reload app
+	$(PIPENV) run wave run --no-reload llm_studio.app
 
 .PHONY: llmstudio-conda
 llmstudio-conda:
 	CONDA_ACTIVATE="source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate llmstudio" && \
 	bash -c "$$CONDA_ACTIVATE && \
 		nvidia-smi && \
+		HF_HUB_DISABLE_TELEMETRY=1 \
 		H2O_WAVE_MAX_REQUEST_SIZE=25MB \
 		H2O_WAVE_NO_LOG=true \
 		H2O_WAVE_PRIVATE_DIR="/download/@$(WORKDIR)/output/download" \
-		wave run --no-reload app"
+		wave run --no-reload llm_studio.app"
 
 .PHONY: stop-llmstudio
 stop-llmstudio:
@@ -225,7 +229,7 @@ endif
 		--shm-size=64g \
 		--init \
 		--rm \
-		--it \
+		-it \
 		-u `id -u`:`id -g` \
 		-p 10101:10101 \
 		-v `pwd`/llmstudio_mnt:/home/llmstudio/mount \
